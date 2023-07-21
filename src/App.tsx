@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { useEffect, useState } from "react";
 import "./App.css";
-import { Devnet } from "./components/Devnet";
 import { init, createFhevmInstance } from "./fhevmjs";
 import { ethers } from "ethers";
 import { getInstance } from "./fhevmjs";
@@ -13,6 +12,11 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [voterAddress, setVoterAddress] = useState("");
   const [winner, setWinner] = useState(-1);
+  const [votingTokenAddress, setVotingTokenAddress] = useState("");
+  const [owner, setOwner] = useState("");
+  const [mintError, setMintError] = useState(false);
+  const [votingError, setVotingError] = useState(false);
+
   let instance: any;
   let publicKey: any;
   const startup = async () => {
@@ -138,17 +142,22 @@ function App() {
 
   const getOwner = async () => {
     const owner = await votingCenterContract.owner();
-    console.log(owner);
+    setOwner(owner);
   };
 
   const getVotingTokenAddress = async () => {
     const votingTokenAddress = await votingCenterContract.votingTokenAddress();
-    console.log(votingTokenAddress);
+    setVotingTokenAddress(votingTokenAddress);
   };
 
   const mintForVoter = async () => {
-    const tx = await votingCenterContract.mint(voterAddress);
-    console.log(tx);
+    try {
+      const tx = await votingCenterContract.mint(voterAddress);
+      console.log(tx);
+    } catch (e) {
+      console.log("error minting", e);
+      setMintError(true);
+    }
   };
 
   const voterHandler = (e: any) => {
@@ -167,13 +176,19 @@ function App() {
       console.log(tx);
     } catch (e) {
       console.log("error voting for candidate 1", e);
+      setVotingError(true);
     }
   };
 
   const voteForCandidate2 = async () => {
-    const encryptedVote = instance.encrypt8(2);
-    const tx = await votingCenterContract.vote(encryptedVote);
-    console.log(tx);
+    try {
+      const encryptedVote = instance.encrypt8(2);
+      const tx = await votingCenterContract.vote(encryptedVote);
+      console.log(tx);
+    } catch (e) {
+      console.log("error voting for candidate 2", e);
+      setVotingError(true);
+    }
   };
 
   const checkWinner = async () => {
@@ -190,8 +205,9 @@ function App() {
 
   return (
     <>
-      <button onClick={getOwner}>Owner</button>
-      <button onClick={getVotingTokenAddress}>Voting Token Address</button>
+      <h1>DeVOTE</h1>
+      <div>On chain anonymous voting using FHE!</div>
+
       <div>
         <h2>Mint for User</h2>
         <input
@@ -199,26 +215,49 @@ function App() {
           value={voterAddress}
           onChange={voterHandler}
         ></input>
-        <button onClick={mintForVoter}>Mint</button>
+        <button className="button" onClick={mintForVoter}>
+          Mint
+        </button>
+        {mintError && <div className="errorMessage">Minting Error</div>}
       </div>
       <div>
         <h2>Vote</h2>
-        <button onClick={voteForCandidate1}>Vote for Candidate 1</button>
-        <button onClick={voteForCandidate2}>Vote for Candidate 2</button>
+        <button className="button" onClick={voteForCandidate1}>
+          Vote for Candidate 1
+        </button>
+        <button className="button" onClick={voteForCandidate2}>
+          Vote for Candidate 2
+        </button>
+        {votingError && <div className="errorMessage">Error Voting</div>}
       </div>
       <div>
-        <button onClick={checkWinner}>Check Winner</button>
-        <div>{winner}</div>
+        <h2>Results</h2>
+        <button className="button" onClick={checkWinner}>
+          Check Winner
+        </button>
+        <div>Winner: {winner}</div>
       </div>
-      <h1>fhevmjs</h1>
-      <div className="card">
-        <Devnet />
+      <div>
+        <h2>Helper Functions</h2>
+        <div className="bottomDiv">
+          <div className="container">
+            <button className="button" onClick={getOwner}>
+              Owner
+            </button>
+            <div>
+              Owner Address: <br /> {owner}
+            </div>
+          </div>
+          <div className="container">
+            <button className="button" onClick={getVotingTokenAddress}>
+              Voting Token Address
+            </button>
+            <div>
+              Voting Token Address: <br /> {votingTokenAddress}
+            </div>
+          </div>
+        </div>
       </div>
-      <p className="read-the-docs">
-        <a href="https://docs.zama.ai/fhevm">
-          See the documentation for more information
-        </a>
-      </p>
     </>
   );
 }
