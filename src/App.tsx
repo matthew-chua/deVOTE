@@ -7,6 +7,8 @@ import "./App.css";
 import { init, createFhevmInstance } from "./fhevmjs";
 import { ethers } from "ethers";
 import { getInstance } from "./fhevmjs";
+import v1 from "../src/abi/v1.js";
+import v2 from "../src/abi/v2.js";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -24,7 +26,7 @@ function App() {
     await createFhevmInstance();
     instance = getInstance();
     publicKey = instance.generateToken({
-      verifyingContract: "0xBb775bd464A5a37D8c67B0DCcC52B9848A991ddd",
+      verifyingContract: "0xbb2ef38c0084c45b9a3d1edf309272dd2b3963ab",
     }).publicKey;
     setIsInitialized(true);
   };
@@ -35,109 +37,8 @@ function App() {
   const connectWallet = async () => {
     provider = new ethers.BrowserProvider(window.ethereum);
     signer = await provider.getSigner();
-    const votingCenterAddress = "0xBb775bd464A5a37D8c67B0DCcC52B9848A991ddd";
-    const votingCenterABI = [
-      {
-        inputs: [
-          {
-            internalType: "uint256",
-            name: "votingTime",
-            type: "uint256",
-          },
-        ],
-        stateMutability: "nonpayable",
-        type: "constructor",
-      },
-      {
-        inputs: [
-          {
-            internalType: "bytes32",
-            name: "publicKey",
-            type: "bytes32",
-          },
-        ],
-        name: "checkWinner",
-        outputs: [
-          {
-            internalType: "bytes",
-            name: "",
-            type: "bytes",
-          },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-      {
-        inputs: [],
-        name: "endTime",
-        outputs: [
-          {
-            internalType: "uint256",
-            name: "",
-            type: "uint256",
-          },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-      {
-        inputs: [
-          {
-            internalType: "address",
-            name: "_to",
-            type: "address",
-          },
-        ],
-        name: "mint",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-      {
-        inputs: [],
-        name: "owner",
-        outputs: [
-          {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-      {
-        inputs: [
-          {
-            internalType: "bytes",
-            name: "encryptedVote",
-            type: "bytes",
-          },
-        ],
-        name: "vote",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-      {
-        inputs: [],
-        name: "votingTokenAddress",
-        outputs: [
-          {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-    ];
-    votingCenterContract = new ethers.Contract(
-      votingCenterAddress,
-      votingCenterABI,
-      signer
-    );
+    const votingCenterAddress = "0xbb2ef38c0084c45b9a3d1edf309272dd2b3963ab";
+    votingCenterContract = new ethers.Contract(votingCenterAddress, v1, signer);
   };
 
   const getOwner = async () => {
@@ -165,28 +66,17 @@ function App() {
   };
 
   useEffect(() => {
-    startup().catch((e) => console.log("HEREREEE init failed", e));
+    startup().catch((e) => console.log("init failed", e));
     connectWallet().catch((e) => console.log("connect wallet failed", e));
   });
 
-  const voteForCandidate1 = async () => {
+  const voteForCandidate = async (candidateID: number) => {
     try {
-      const encryptedVote = instance.encrypt8(1);
+      const encryptedVote = await instance.encrypt8(candidateID);
       const tx = await votingCenterContract.vote(encryptedVote);
       console.log(tx);
     } catch (e) {
-      console.log("error voting for candidate 1", e);
-      setVotingError(true);
-    }
-  };
-
-  const voteForCandidate2 = async () => {
-    try {
-      const encryptedVote = instance.encrypt8(2);
-      const tx = await votingCenterContract.vote(encryptedVote);
-      console.log(tx);
-    } catch (e) {
-      console.log("error voting for candidate 2", e);
+      console.log(`Error voting for candidate ${candidateID}`, e);
       setVotingError(true);
     }
   };
@@ -194,10 +84,9 @@ function App() {
   const checkWinner = async () => {
     const winner = await votingCenterContract.checkWinner(publicKey);
     const decryptedWinner = instance.decrypt(
-      "0xBb775bd464A5a37D8c67B0DCcC52B9848A991ddd",
+      "0xbb2ef38c0084c45b9a3d1edf309272dd2b3963ab",
       winner as string
     );
-    console.log(decryptedWinner);
     setWinner(decryptedWinner);
   };
 
@@ -222,12 +111,30 @@ function App() {
       </div>
       <div>
         <h2>Vote</h2>
-        <button className="button" onClick={voteForCandidate1}>
+        <button
+          className="button"
+          onClick={async () => {
+            await voteForCandidate(1);
+          }}
+        >
           Vote for Candidate 1
         </button>
-        <button className="button" onClick={voteForCandidate2}>
+        <button
+          className="button"
+          onClick={async () => {
+            await voteForCandidate(2);
+          }}
+        >
           Vote for Candidate 2
         </button>
+        {/* <button
+          className="button"
+          onClick={async () => {
+            await voteForCandidate(3);
+          }}
+        >
+          Vote for Candidate 3
+        </button> */}
         {votingError && <div className="errorMessage">Error Voting</div>}
       </div>
       <div>
