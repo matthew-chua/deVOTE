@@ -19,6 +19,8 @@ function App() {
   const [mintError, setMintError] = useState(false);
   const [votingError, setVotingError] = useState(false);
 
+  const CONTRACT_ADDRESS = "0x0D853877C8925Ca6c99710a8742eB14095E6cEAD";
+
   let instance: any;
   let publicKey: any;
   const startup = async () => {
@@ -26,7 +28,7 @@ function App() {
     await createFhevmInstance();
     instance = getInstance();
     publicKey = instance.generateToken({
-      verifyingContract: "0xbb2ef38c0084c45b9a3d1edf309272dd2b3963ab",
+      verifyingContract: CONTRACT_ADDRESS,
     }).publicKey;
     setIsInitialized(true);
   };
@@ -37,8 +39,8 @@ function App() {
   const connectWallet = async () => {
     provider = new ethers.BrowserProvider(window.ethereum);
     signer = await provider.getSigner();
-    const votingCenterAddress = "0xbb2ef38c0084c45b9a3d1edf309272dd2b3963ab";
-    votingCenterContract = new ethers.Contract(votingCenterAddress, v1, signer);
+    const votingCenterAddress = CONTRACT_ADDRESS;
+    votingCenterContract = new ethers.Contract(votingCenterAddress, v2, signer);
   };
 
   const getOwner = async () => {
@@ -84,11 +86,22 @@ function App() {
   const checkWinner = async () => {
     const winner = await votingCenterContract.checkWinner(publicKey);
     const decryptedWinner = instance.decrypt(
-      "0xbb2ef38c0084c45b9a3d1edf309272dd2b3963ab",
+      CONTRACT_ADDRESS,
       winner as string
     );
     setWinner(decryptedWinner);
   };
+
+  const readVotes = async () => {
+    const res = await votingCenterContract.getCandidates();
+    console.log('here')
+    const test = res[0]
+    const decryptedRes = instance.decrypt(
+      CONTRACT_ADDRESS,
+      test as string
+    );
+    console.log(decryptedRes)
+  }
 
   if (!isInitialized) return null;
 
@@ -127,14 +140,19 @@ function App() {
         >
           Vote for Candidate 2
         </button>
-        {/* <button
+        <button
           className="button"
           onClick={async () => {
             await voteForCandidate(3);
           }}
         >
           Vote for Candidate 3
-        </button> */}
+        </button>
+        <button onClick={async () => {
+            await voteForCandidate(0);
+          }}>
+          Burn Vote
+        </button>
         {votingError && <div className="errorMessage">Error Voting</div>}
       </div>
       <div>
