@@ -11,6 +11,7 @@ import Candidate from "./interfaces/Candidate";
 import Button from "./components/Button";
 import Card from "./components/Card";
 import Banner from "./components/Banner";
+import Modal from "./components/Modal";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -21,8 +22,8 @@ function App() {
   const [mintError, setMintError] = useState(false);
   const [votingError, setVotingError] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const CONTRACT_ADDRESS = "0x9c952C683AD47DE9770D906E6B805308C5B93107";
+  const [readLoading, setReadLoading] = useState(false);
+  const CONTRACT_ADDRESS = "0x4A8394f7B70Ebb3EbA6eD61F9963125814e3aCc8";
   const candidates: Candidate[] = [
     {
       id: 1,
@@ -99,7 +100,7 @@ function App() {
     connectWallet().catch((e) => console.log("connect wallet failed", e));
   });
 
-  const voteForCandidate = async (candidateID: number) => {
+  const voteForCandidate = async (candidateID: number): Promise<void> => {
     try {
       setLoading(true);
       const encryptedVote = await instance.encrypt8(candidateID);
@@ -114,14 +115,14 @@ function App() {
   };
 
   const checkWinner = async () => {
-    setLoading(true);
+    setReadLoading(true);
     const winner = await votingCenterContract.checkWinner(publicKey);
     const decryptedWinner = instance.decrypt(
       CONTRACT_ADDRESS,
       winner as string
     );
     setWinner(decryptedWinner);
-    setLoading(false);
+    setReadLoading(false);
   };
 
   if (!isInitialized) return null;
@@ -150,18 +151,23 @@ function App() {
           />
         ))}
       </div>
-      <Banner />
-
+      <Banner
+        burnVote={async () => {
+          voteForCandidate(0);
+        }}
+        loading={loading}
+      />
       <div className="flex flex-col items-center mt-8">
         <Button
           className="bg-slate-500"
           label="Reveal Winner"
-          onClick={async () => {}}
+          loading={readLoading}
+          onClick={checkWinner}
         />
-        <div className="text-4xl font-thin mt-4">{candidates[winner].name}</div>
+        <div className="text-2xl font-thin mt-4">{candidates[winner].name}</div>
       </div>
-      <hr className="h-1 my-8 w-full bg-white border-0 dark:bg-white"/>
-      <div className="w-full mt-4 bottom-4 left-4">
+      <hr className="h-1 my-4 w-full bg-white border-1" />
+      <div className="w-full bottom-4 left-4">
         <div className="flex flex-col w-1/3">
           <div className="flex">
             <div>Voting Contract:</div>
@@ -180,6 +186,13 @@ function App() {
           </div>
         </div>
       </div>
+      {votingError && (
+        <Modal
+          onClose={() => {
+            setVotingError(false);
+          }}
+        />
+      )}
     </div>
   );
 }
