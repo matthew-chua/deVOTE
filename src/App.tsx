@@ -13,13 +13,13 @@ import v2 from "../src/abi/v2.js";
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [voterAddress, setVoterAddress] = useState("");
-  const [winner, setWinner] = useState(-1);
+  const [winner, setWinner] = useState(0);
   const [votingTokenAddress, setVotingTokenAddress] = useState("");
   const [owner, setOwner] = useState("");
   const [mintError, setMintError] = useState(false);
   const [votingError, setVotingError] = useState(false);
 
-  const CONTRACT_ADDRESS = "0x0D853877C8925Ca6c99710a8742eB14095E6cEAD";
+  const CONTRACT_ADDRESS = "0x9c952C683AD47DE9770D906E6B805308C5B93107";
 
   let instance: any;
   let publicKey: any;
@@ -91,17 +91,6 @@ function App() {
     );
     setWinner(decryptedWinner);
   };
-
-  const readVotes = async () => {
-    const res = await votingCenterContract.getCandidates();
-    console.log('here')
-    const test = res[0]
-    const decryptedRes = instance.decrypt(
-      CONTRACT_ADDRESS,
-      test as string
-    );
-    console.log(decryptedRes)
-  }
 
   if (!isInitialized) return null;
 

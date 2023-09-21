@@ -16,10 +16,11 @@ contract VotingCenter {
     address public owner;
     address public votingTokenAddress;
     uint8 public numberOfCandidates;
+    bool public mandatoryVoting;
     VotingToken votingToken;
     mapping(uint => euint32) public candidateVotes;
     
-    constructor(uint votingTime, uint8 _numberOfCandidates) {
+    constructor(uint votingTime, uint8 _numberOfCandidates, bool _mandatoryVoting) {
         
         for (uint i=0; i<=numberOfCandidates; i++){
             candidateVotes[i] = TFHE.asEuint32(0);
@@ -31,6 +32,7 @@ contract VotingCenter {
         winnerID = TFHE.asEuint8(0);
         votingTokenAddress = address(votingToken);
         numberOfCandidates = _numberOfCandidates;
+        mandatoryVoting = _mandatoryVoting;
     }
 
     //called by the backend script
@@ -45,14 +47,19 @@ contract VotingCenter {
         return TFHE.reencrypt(winnerID, publicKey, 0);
     }
 
-    //input should be encrypted, called from the FE
+    //input should be encrypted, called from the FE. Vote = 0 = void
     function vote(bytes calldata encryptedVote) public {
         // require(block.timestamp < endTime, "Voting is over");
         
-        //transfer voting token from voter to VotingCenter, to prevent double voting
+        // transfer voting token from voter to VotingCenter, to prevent double voting
         // require(votingToken.transferFrom(msg.sender), "Voter has already voted.");
 
         euint8 votee = TFHE.asEuint8(encryptedVote);
+        // enforce non-zero vote if mandatoryVoting on
+        // might want to use optimisticRequire
+        require(!mandatoryVoting || TFHE.decrypt(TFHE.ne(0, votee)));
+        require(TFHE.decrypt(TFHE.le(votee, numberOfCandidates)));
+
         for (uint i=1; i<=numberOfCandidates; i++) {
             euint8 condition = TFHE.asEuint8(TFHE.eq(votee, TFHE.asEuint8(i)));
             euint32 newCount = TFHE.add(candidateVotes[i], condition);
