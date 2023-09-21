@@ -3,11 +3,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { useEffect, useState } from "react";
-import "./App.css";
 import { init, createFhevmInstance } from "./fhevmjs";
 import { ethers } from "ethers";
 import { getInstance } from "./fhevmjs";
 import v2 from "../src/abi/v2.json";
+import Candidate from "./interfaces/Candidate";
+import Button from "./components/Button";
+import Card from "./components/Card";
+import Banner from "./components/Banner";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -20,7 +23,26 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const CONTRACT_ADDRESS = "0x9c952C683AD47DE9770D906E6B805308C5B93107";
-  const candidates: number[] = [1, 2];
+  const candidates: Candidate[] = [
+    {
+      id: 1,
+      name: "Candidate 1",
+      description:
+        "Lorem ipsum blah blah blah some description about the candidate goes here.",
+    },
+    {
+      id: 2,
+      name: "Candidate 2",
+      description:
+        "Lorem ipsum blah blah blah some description about the candidate goes here.",
+    },
+    {
+      id: 3,
+      name: "Candidate 3",
+      description:
+        "Lorem ipsum blah blah blah some description about the candidate goes here.",
+    },
+  ];
 
   let instance: any;
   let publicKey: any;
@@ -58,7 +80,7 @@ function App() {
     setVotingTokenAddress(votingTokenAddress);
   };
 
-  const mintForVoter = async () => {
+  const mintForVoter = async (): Promise<void> => {
     try {
       const tx = await votingCenterContract.mint(voterAddress);
       console.log(tx);
@@ -105,73 +127,60 @@ function App() {
   if (!isInitialized) return null;
 
   return (
-    <>
-      <h1>DeVOTE</h1>
-      <div>On chain anonymous voting using FHE!</div>
-
-      <div>
+    <div className="flex flex-col items-center font-display p-12 h-screen text-white">
+      <h1 className="text-6xl font-thin">deVOTE</h1>
+      {/* <div className="flex flex-col items-center">
         <h2>Mint for User</h2>
         <input
           placeholder="Voter Address"
           value={voterAddress}
           onChange={voterHandler}
         ></input>
-        <button className="button" onClick={mintForVoter}>
-          Mint
-        </button>
+        <Button label="Mint" onClick={mintForVoter} />
         {mintError && <div className="errorMessage">Minting Error</div>}
-      </div>
-      <div>
-        <h2>Vote</h2>
+      </div> */}
+
+      <div className="flex flex-wrap gap-8 items-center justify-center my-8">
         {candidates.map((candidate) => (
-          <button
-            disabled={loading}
+          <Card
+            candidate={candidate}
             onClick={async () => {
-              await voteForCandidate(candidate);
+              await voteForCandidate(candidate.id);
             }}
-          >
-            Candidate {candidate}
-          </button>
+          />
         ))}
-        <button
-          disabled={loading}
-          onClick={async () => {
-            await voteForCandidate(0);
-          }}
-        >
-          Burn Vote
-        </button>
-        {votingError && <div className="errorMessage">Error Voting</div>}
       </div>
-      <div>
-        <h2>Results</h2>
-        <button disabled={loading} className="button" onClick={checkWinner}>
-          Check Winner
-        </button>
-        <div>Winner: {winner}</div>
+      <Banner />
+
+      <div className="flex flex-col items-center mt-8">
+        <Button
+          className="bg-slate-500"
+          label="Reveal Winner"
+          onClick={async () => {}}
+        />
+        <div className="text-4xl font-thin mt-4">{candidates[winner].name}</div>
       </div>
-      <div>
-        <h2>Helper Functions</h2>
-        <div className="bottomDiv">
-          <div className="container">
-            <button className="button" onClick={getOwner}>
-              Owner
-            </button>
-            <div>
-              Owner Address: <br /> {owner}
-            </div>
+      <hr className="h-1 my-8 w-full bg-white border-0 dark:bg-white"/>
+      <div className="w-full mt-4 bottom-4 left-4">
+        <div className="flex flex-col w-1/3">
+          <div className="flex">
+            <div>Voting Contract:</div>
+            <div className="grow" />
+            <div>{CONTRACT_ADDRESS}</div>
           </div>
-          <div className="container">
-            <button className="button" onClick={getVotingTokenAddress}>
-              Voting Token Address
-            </button>
-            <div>
-              Voting Token Address: <br /> {votingTokenAddress}
-            </div>
+          <div className="flex">
+            <div>Voting Token:</div>
+            <div className="grow" />
+            <div>{CONTRACT_ADDRESS}</div>
+          </div>
+          <div className="flex">
+            <div>Election Organiser:</div>
+            <div className="grow" />
+            <div>{CONTRACT_ADDRESS}</div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
