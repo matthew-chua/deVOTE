@@ -12,6 +12,8 @@ import Button from "./components/Button";
 import Card from "./components/Card";
 import Banner from "./components/Banner";
 import Modal from "./components/Modal";
+import ConfirmationModal from "./components/ConfirmationModal";
+import Overlay from "./components/Overlay";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -23,6 +25,8 @@ function App() {
   const [votingError, setVotingError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [readLoading, setReadLoading] = useState(false);
+  const [openConfirmationModal, setOpenConfirmationModal] = useState(true);
+  const [selectedCandidate, setSelectedCandidate] = useState<number>(-1);
   const CONTRACT_ADDRESS = "0x4A8394f7B70Ebb3EbA6eD61F9963125814e3aCc8";
   const candidates: Candidate[] = [
     {
@@ -45,9 +49,28 @@ function App() {
     },
   ];
 
+  const changeNetwork = async () => {
+    await window.ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: "0x1F49",
+          rpcUrls: ["https://devnet.zama.ai"],
+          chainName: "Zama Devnet",
+          nativeCurrency: {
+            name: "ZAMA",
+            symbol: "ZAMA",
+            decimals: 18,
+          },
+        },
+      ],
+    });
+  };
+
   let instance: any;
   let publicKey: any;
   const startup = async () => {
+    await changeNetwork();
     await init();
     await createFhevmInstance();
     instance = getInstance();
@@ -106,6 +129,7 @@ function App() {
       const encryptedVote = await instance.encrypt8(candidateID);
       const tx = await votingCenterContract.vote(encryptedVote);
       await tx.wait();
+      console.log(tx);
       setLoading(false);
     } catch (e) {
       setLoading(false);
@@ -125,11 +149,16 @@ function App() {
     setReadLoading(false);
   };
 
+  const clickCardHandler = (candidateID: number) => {
+    setOpenConfirmationModal(true);
+    setSelectedCandidate(candidateID);
+  };
+
   if (!isInitialized) return null;
 
   return (
-    <div className="flex flex-col items-center font-display p-12 h-screen text-white">
-      <h1 className="text-6xl font-thin">deVOTE</h1>
+    <div className="flex flex-col items-center font-display px-4 h-screen text-white">
+      <h1 className="text-6xl font-thin mt-12">deVOTE</h1>
       {/* <div className="flex flex-col items-center">
         <h2>Mint for User</h2>
         <input
@@ -145,8 +174,9 @@ function App() {
         {candidates.map((candidate) => (
           <Card
             candidate={candidate}
-            onClick={async () => {
-              await voteForCandidate(candidate.id);
+            key={candidate.id}
+            onClick={() => {
+              clickCardHandler(candidate.id);
             }}
           />
         ))}
@@ -186,12 +216,30 @@ function App() {
           </div>
         </div>
       </div>
-      {votingError && (
+      {/* {votingError && (
         <Modal
           onClose={() => {
             setVotingError(false);
           }}
         />
+      )} */}
+      {openConfirmationModal && (
+        <>
+          <Overlay
+            onClick={() => {
+              setOpenConfirmationModal(false);
+            }}
+          />
+          <ConfirmationModal
+            onClose={() => {
+              setOpenConfirmationModal(false);
+            }}
+            onVote={() => {
+              voteForCandidate(selectedCandidate);
+            }}
+            loading={loading}
+          />
+        </>
       )}
     </div>
   );

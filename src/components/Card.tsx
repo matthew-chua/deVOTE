@@ -6,7 +6,7 @@ export default function Card({
   onClick,
 }: {
   candidate: Candidate;
-  onClick: () => Promise<void>;
+  onClick: () => void;
 }) {
   return (
     <div
