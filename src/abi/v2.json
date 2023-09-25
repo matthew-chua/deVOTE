@@ -1,132 +1,154 @@
-{"abi": [{
-	"inputs": [
+{
+	"abi": [
 		{
-			"internalType": "uint256",
-			"name": "votingTime",
-			"type": "uint256"
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_to",
+					"type": "address"
+				}
+			],
+			"name": "mint",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
 		},
 		{
-			"internalType": "uint8",
-			"name": "_numberOfCandidates",
-			"type": "uint8"
-		}
-	],
-	"stateMutability": "nonpayable",
-	"type": "constructor"
-},
-{
-	"inputs": [
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "votingTime",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint8",
+					"name": "_numberOfCandidates",
+					"type": "uint8"
+				},
+				{
+					"internalType": "bool",
+					"name": "_mandatoryVoting",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "constructor"
+		},
 		{
-			"internalType": "uint256",
-			"name": "",
-			"type": "uint256"
-		}
-	],
-	"name": "candidateVotes",
-	"outputs": [
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "encryptedVote",
+					"type": "bytes"
+				}
+			],
+			"name": "vote",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
 		{
-			"internalType": "euint32",
-			"name": "",
-			"type": "uint256"
-		}
-	],
-	"stateMutability": "view",
-	"type": "function"
-},
-{
-	"inputs": [
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "candidateVotes",
+			"outputs": [
+				{
+					"internalType": "euint32",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
-			"internalType": "bytes32",
-			"name": "publicKey",
-			"type": "bytes32"
-		}
-	],
-	"name": "checkWinner",
-	"outputs": [
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "publicKey",
+					"type": "bytes32"
+				}
+			],
+			"name": "checkWinner",
+			"outputs": [
+				{
+					"internalType": "bytes",
+					"name": "",
+					"type": "bytes"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
-			"internalType": "bytes",
-			"name": "",
-			"type": "bytes"
-		}
-	],
-	"stateMutability": "view",
-	"type": "function"
-},
-{
-	"inputs": [],
-	"name": "endTime",
-	"outputs": [
+			"inputs": [],
+			"name": "endTime",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
-			"internalType": "uint256",
-			"name": "",
-			"type": "uint256"
-		}
-	],
-	"stateMutability": "view",
-	"type": "function"
-},
-{
-	"inputs": [
+			"inputs": [],
+			"name": "mandatoryVoting",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
-			"internalType": "address",
-			"name": "_to",
-			"type": "address"
-		}
-	],
-	"name": "mint",
-	"outputs": [],
-	"stateMutability": "nonpayable",
-	"type": "function"
-},
-{
-	"inputs": [],
-	"name": "numberOfCandidates",
-	"outputs": [
+			"inputs": [],
+			"name": "numberOfCandidates",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
-			"internalType": "uint8",
-			"name": "",
-			"type": "uint8"
-		}
-	],
-	"stateMutability": "view",
-	"type": "function"
-},
-{
-	"inputs": [],
-	"name": "owner",
-	"outputs": [
+			"inputs": [],
+			"name": "owner",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
 		{
-			"internalType": "address",
-			"name": "",
-			"type": "address"
+			"inputs": [],
+			"name": "votingTokenAddress",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
 		}
-	],
-	"stateMutability": "view",
-	"type": "function"
-},
-{
-	"inputs": [
-		{
-			"internalType": "bytes",
-			"name": "encryptedVote",
-			"type": "bytes"
-		}
-	],
-	"name": "vote",
-	"outputs": [],
-	"stateMutability": "nonpayable",
-	"type": "function"
-},
-{
-	"inputs": [],
-	"name": "votingTokenAddress",
-	"outputs": [
-		{
-			"internalType": "address",
-			"name": "",
-			"type": "address"
-		}
-	],
-	"stateMutability": "view",
-	"type": "function"
-}]}
+	]
+}

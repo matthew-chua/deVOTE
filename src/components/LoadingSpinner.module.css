@@ -1,7 +1,6 @@
 .loader {
-  margin-top: 0.4rem;
-  width: 20px;
-  height: 20px;
+  width: 100px;
+  height: 100px;
   background: #FFF;
   display: inline-block;
   border-radius: 50%;

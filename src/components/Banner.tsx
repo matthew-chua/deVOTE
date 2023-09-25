@@ -1,12 +1,16 @@
 import Button from "./Button";
 
 export default function Banner({
-  burnVote,
-  loading,
+  setSelectedCandidate,
+  setOpenConfirmationModal,
 }: {
-  burnVote: () => Promise<void>;
-  loading: boolean;
+  setSelectedCandidate: (candidate: number) => void;
+  setOpenConfirmationModal: (open: boolean) => void;
 }) {
+  const handleBurnVote = () => {
+    setOpenConfirmationModal(true);
+    setSelectedCandidate(0);
+  };
   return (
     <div className="flex items-center w-full max-w-[830px] p-5 font-thin bg-slate-500 rounded-xl m-2">
       <div>
@@ -15,7 +19,7 @@ export default function Banner({
         anonymously.
       </div>
       <div className="grow" />
-      <Button label="Burn Vote" onClick={burnVote} loading={loading} />
+      <Button label="Burn Vote" onClick={handleBurnVote} />
     </div>
   );
 }

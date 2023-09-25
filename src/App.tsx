@@ -11,7 +11,6 @@ import Candidate from "./interfaces/Candidate";
 import Button from "./components/Button";
 import Card from "./components/Card";
 import Banner from "./components/Banner";
-import Modal from "./components/Modal";
 import ConfirmationModal from "./components/ConfirmationModal";
 import Overlay from "./components/Overlay";
 
@@ -21,13 +20,12 @@ function App() {
   const [winner, setWinner] = useState(0);
   const [votingTokenAddress, setVotingTokenAddress] = useState("");
   const [owner, setOwner] = useState("");
+  const [burnable, setBurnable] = useState(false);
   const [mintError, setMintError] = useState(false);
-  const [votingError, setVotingError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [readLoading, setReadLoading] = useState(false);
-  const [openConfirmationModal, setOpenConfirmationModal] = useState(true);
+  const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<number>(-1);
-  const CONTRACT_ADDRESS = "0x4A8394f7B70Ebb3EbA6eD61F9963125814e3aCc8";
+  const CONTRACT_ADDRESS = "0x3e5e40f2C9029Dae63EEA647Ff7F0E9C36d8203B";
   const candidates: Candidate[] = [
     {
       id: 1,
@@ -92,16 +90,14 @@ function App() {
       v2.abi,
       signer
     );
-  };
-
-  const getOwner = async () => {
     const owner = await votingCenterContract.owner();
     setOwner(owner);
-  };
-
-  const getVotingTokenAddress = async () => {
-    const votingTokenAddress = await votingCenterContract.votingTokenAddress();
-    setVotingTokenAddress(votingTokenAddress);
+    const tokenAddress = await votingCenterContract.votingTokenAddress();
+    setVotingTokenAddress(tokenAddress);
+    await checkWinner();
+    const mandatoryVoting = await votingCenterContract.mandatoryVoting();
+    console.log("HERE", mandatoryVoting);
+    setBurnable(!mandatoryVoting);
   };
 
   const mintForVoter = async (): Promise<void> => {
@@ -131,22 +127,20 @@ function App() {
       await tx.wait();
       console.log(tx);
       setLoading(false);
+      setOpenConfirmationModal(false);
     } catch (e) {
       setLoading(false);
       console.log(`Error voting for candidate ${candidateID}`, e);
-      setVotingError(true);
     }
   };
 
   const checkWinner = async () => {
-    setReadLoading(true);
     const winner = await votingCenterContract.checkWinner(publicKey);
     const decryptedWinner = instance.decrypt(
       CONTRACT_ADDRESS,
       winner as string
     );
     setWinner(decryptedWinner);
-    setReadLoading(false);
   };
 
   const clickCardHandler = (candidateID: number) => {
@@ -181,20 +175,21 @@ function App() {
           />
         ))}
       </div>
-      <Banner
-        burnVote={async () => {
-          voteForCandidate(0);
-        }}
-        loading={loading}
-      />
+      {burnable && (
+        <Banner
+          setOpenConfirmationModal={setOpenConfirmationModal}
+          setSelectedCandidate={setSelectedCandidate}
+        />
+      )}
       <div className="flex flex-col items-center mt-8">
         <Button
           className="bg-slate-500"
           label="Reveal Winner"
-          loading={readLoading}
           onClick={checkWinner}
         />
-        <div className="text-2xl font-thin mt-4">{candidates[winner].name}</div>
+        <div className="text-2xl font-thin mt-4">
+          {winner === 0 ? `Tie` : candidates[winner - 1].name}
+        </div>
       </div>
       <hr className="h-1 my-4 w-full bg-white border-1" />
       <div className="w-full bottom-4 left-4">
@@ -202,35 +197,31 @@ function App() {
           <div className="flex">
             <div>Voting Contract:</div>
             <div className="grow" />
-            <div>{CONTRACT_ADDRESS}</div>
+            <div className="w-80">{CONTRACT_ADDRESS}</div>
           </div>
           <div className="flex">
             <div>Voting Token:</div>
             <div className="grow" />
-            <div>{CONTRACT_ADDRESS}</div>
+            <div className="w-80">{votingTokenAddress}</div>
           </div>
           <div className="flex">
             <div>Election Organiser:</div>
             <div className="grow" />
-            <div>{CONTRACT_ADDRESS}</div>
+            <div className="w-80">{owner}</div>
           </div>
         </div>
       </div>
-      {/* {votingError && (
-        <Modal
-          onClose={() => {
-            setVotingError(false);
-          }}
-        />
-      )} */}
+
       {openConfirmationModal && (
         <>
           <Overlay
+            loading={loading}
             onClick={() => {
               setOpenConfirmationModal(false);
             }}
           />
           <ConfirmationModal
+            selectedCandidate={selectedCandidate}
             onClose={() => {
               setOpenConfirmationModal(false);
             }}
