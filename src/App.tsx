@@ -23,6 +23,7 @@ function App() {
   const [burnable, setBurnable] = useState(false);
   const [mintError, setMintError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<number>(-1);
   const CONTRACT_ADDRESS = "0x3e5e40f2C9029Dae63EEA647Ff7F0E9C36d8203B";
@@ -127,7 +128,7 @@ function App() {
       await tx.wait();
       console.log(tx);
       setLoading(false);
-      setOpenConfirmationModal(false);
+      setSuccess(true);
     } catch (e) {
       setLoading(false);
       console.log(`Error voting for candidate ${candidateID}`, e);
@@ -221,6 +222,8 @@ function App() {
             }}
           />
           <ConfirmationModal
+            success={success}
+            setSuccess={setSuccess}
             selectedCandidate={selectedCandidate}
             onClose={() => {
               setOpenConfirmationModal(false);
