@@ -26,7 +26,7 @@ function App() {
   const [success, setSuccess] = useState(false);
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<number>(-1);
-  const CONTRACT_ADDRESS = "0x3e5e40f2C9029Dae63EEA647Ff7F0E9C36d8203B";
+  const CONTRACT_ADDRESS = "0xf6787A0a161b8df6E7e3cF274d8131098fdb7786";
   const candidates: Candidate[] = [
     {
       id: 1,
@@ -198,17 +198,35 @@ function App() {
           <div className="flex">
             <div>Voting Contract:</div>
             <div className="grow" />
-            <div className="w-80">{CONTRACT_ADDRESS}</div>
+            <a
+              href={`https://main.explorer.zama.ai/address/${CONTRACT_ADDRESS}`}
+              target="_blank"
+              className="w-80 hover:underline"
+            >
+              {CONTRACT_ADDRESS}
+            </a>
           </div>
           <div className="flex">
             <div>Voting Token:</div>
             <div className="grow" />
-            <div className="w-80">{votingTokenAddress}</div>
+            <a
+              href={`https://main.explorer.zama.ai/address/${votingTokenAddress}`}
+              target="_blank"
+              className="w-80 hover:underline"
+            >
+              {votingTokenAddress}
+            </a>
           </div>
           <div className="flex">
             <div>Election Organiser:</div>
             <div className="grow" />
-            <div className="w-80">{owner}</div>
+            <a
+              href={`https://main.explorer.zama.ai/address/${owner}`}
+              target="_blank"
+              className="w-80 hover:underline"
+            >
+              {owner}
+            </a>
           </div>
         </div>
       </div>
