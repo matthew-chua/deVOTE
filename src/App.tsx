@@ -26,7 +26,7 @@ function App() {
   const [success, setSuccess] = useState(false);
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<number>(-1);
-  const CONTRACT_ADDRESS = "0xf6787A0a161b8df6E7e3cF274d8131098fdb7786";
+  const CONTRACT_ADDRESS = "0x41c737f66a0Ee99CF7c66627300D4bC9ab5EE8B3";
   const candidates: Candidate[] = [
     {
       id: 1,
