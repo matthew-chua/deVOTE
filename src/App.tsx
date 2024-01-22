@@ -71,17 +71,18 @@ function App() {
   const startup = async () => {
     await changeNetwork();
     await init();
-    await createFhevmInstance();
+    await createFhevmInstance(); 
     instance = getInstance();
-    publicKey = instance.generateToken({
-      verifyingContract: CONTRACT_ADDRESS,
-    }).publicKey;
+    // publicKey = instance.generateToken({
+    //   verifyingContract: CONTRACT_ADDRESS,
+    // }).publicKey;
     setIsInitialized(true);
   };
 
   let provider;
   let signer;
   let votingCenterContract: ethers.Contract;
+  
   const connectWallet = async () => {
     provider = new ethers.BrowserProvider(window.ethereum);
     signer = await provider.getSigner();
@@ -91,13 +92,12 @@ function App() {
       v2.abi,
       signer
     );
+    
     const owner = await votingCenterContract.owner();
     setOwner(owner);
     const tokenAddress = await votingCenterContract.votingTokenAddress();
     setVotingTokenAddress(tokenAddress);
-    await checkWinner();
     const mandatoryVoting = await votingCenterContract.mandatoryVoting();
-    console.log("HERE", mandatoryVoting);
     setBurnable(!mandatoryVoting);
   };
 
@@ -124,7 +124,8 @@ function App() {
     try {
       setLoading(true);
       const encryptedVote = await instance.encrypt8(candidateID);
-      const tx = await votingCenterContract.vote(encryptedVote);
+      // const tx = await votingCenterContract.vote(encryptedVote); //fails here
+      const tx = await votingCenterContract["vote(bytes)"](encryptedVote); 
       await tx.wait();
       console.log(tx);
       setLoading(false);
@@ -137,11 +138,11 @@ function App() {
 
   const checkWinner = async () => {
     const winner = await votingCenterContract.checkWinner(publicKey);
-    const decryptedWinner = instance.decrypt(
-      CONTRACT_ADDRESS,
-      winner as string
-    );
-    setWinner(decryptedWinner);
+    // const decryptedWinner = instance.decrypt(
+    //   CONTRACT_ADDRESS,
+    //   winner as string
+    // );
+    setWinner(winner);
   };
 
   const clickCardHandler = (candidateID: number) => {
@@ -154,7 +155,7 @@ function App() {
   return (
     <div className="flex flex-col items-center font-display px-4 h-screen text-white">
       <h1 className="text-6xl font-thin mt-12">deVOTE</h1>
-      {/* <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center">
         <h2>Mint for User</h2>
         <input
           placeholder="Voter Address"
@@ -163,7 +164,7 @@ function App() {
         ></input>
         <Button label="Mint" onClick={mintForVoter} />
         {mintError && <div className="errorMessage">Minting Error</div>}
-      </div> */}
+      </div>
 
       <div className="flex flex-wrap gap-8 items-center justify-center my-8">
         {candidates.map((candidate) => (
@@ -218,7 +219,7 @@ function App() {
             </a>
           </div>
           <div className="flex">
-            <div>Election Organiser:</div>
+            <div>Campaign Organiser:</div>
             <div className="grow" />
             <a
               href={`https://main.explorer.zama.ai/address/${owner}`}
