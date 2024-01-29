@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import "fhevm/abstracts/EIP712WithModifier.sol";
 import "fhevm/lib/TFHE.sol";
@@ -19,6 +19,8 @@ contract VotingCenter {
     bool public mandatoryVoting;
     VotingToken votingToken;
     mapping(uint => euint32) public candidateVotes;
+
+    ebool voted;
     
     constructor(uint votingTime, uint8 _numberOfCandidates, bool _mandatoryVoting) {
         
@@ -33,6 +35,7 @@ contract VotingCenter {
         votingTokenAddress = address(votingToken);
         numberOfCandidates = _numberOfCandidates;
         mandatoryVoting = _mandatoryVoting;
+        voted = TFHE.asEbool(false);
     }
 
     //called by the backend script
@@ -41,10 +44,14 @@ contract VotingCenter {
         votingToken.mint(_to);
     }
 
-    //return value needs to be decrypted on the FE
-    function checkWinner(bytes32 publicKey) public view returns (bytes memory) {
+    //return decrypted winner
+    function viewWinner() public view returns (uint8) {
+        return TFHE.decrypt(winnerID);
+    }
+
+    function viewVoteCount(uint candidateId) view public returns (uint32) {
         // require(block.timestamp > endTime, "Voting is still in progress");
-        return TFHE.reencrypt(winnerID, publicKey, 0);
+        return TFHE.decrypt(candidateVotes[candidateId]);
     }
 
     //input should be encrypted, called from the FE. Vote = 0 = void
@@ -55,10 +62,10 @@ contract VotingCenter {
         // require(votingToken.transferFrom(msg.sender), "Voter has already voted.");
 
         euint8 votee = TFHE.asEuint8(encryptedVote);
-        // enforce non-zero vote if mandatoryVoting on
-        // might want to use optimisticRequire
-        require(!mandatoryVoting || TFHE.decrypt(TFHE.ne(0, votee)));
-        require(TFHE.decrypt(TFHE.le(votee, numberOfCandidates)));
+        
+        // enforce non-zero voting if mandatory voting is on, and make sure vote is valid (less than number of candidates)
+        euint8 ok = TFHE.and(TFHE.asEuint8(TFHE.ne(0, votee)), TFHE.asEuint8(TFHE.le(votee, numberOfCandidates)));
+        require(!mandatoryVoting || TFHE.decrypt(TFHE.asEbool(ok)));
 
         for (uint i=1; i<=numberOfCandidates; i++) {
             euint8 condition = TFHE.asEuint8(TFHE.eq(votee, TFHE.asEuint8(i)));
@@ -70,5 +77,10 @@ contract VotingCenter {
             winnerID = TFHE.cmux(tie, TFHE.asEuint8(0), winnerID);
             winnerID = TFHE.cmux(newWinner, TFHE.asEuint8(i), winnerID);
         }
+    }
+
+    function pls(bytes calldata input) public view returns(bool) {
+        // euint8 test = TFHE.asEuint8(0);
+        return TFHE.decrypt(TFHE.eq(TFHE.asEuint8(input), TFHE.asEuint8(0)));
     }
 }

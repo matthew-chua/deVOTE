@@ -12,7 +12,7 @@
   "dependencies": {
     "autoprefixer": "^10.4.16",
     "ethers": "^6.6.4",
-    "fhevmjs": "^0.1.1",
+    "fhevmjs": "^0.3.1",
     "postcss": "^8.4.30",
     "prettier": "^3.0.0",
     "react": "^18.2.0",

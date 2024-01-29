@@ -3,9 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { useEffect, useState } from "react";
-import { init, createFhevmInstance } from "./fhevmjs";
+import { init, createFhevmInstance, getInstance } from "./fhevmjs";
 import { ethers } from "ethers";
-import { getInstance } from "./fhevmjs";
 import v2 from "../src/abi/v2.json";
 import Candidate from "./interfaces/Candidate";
 import Button from "./components/Button";
@@ -26,7 +25,12 @@ function App() {
   const [success, setSuccess] = useState(false);
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<number>(-1);
-  const CONTRACT_ADDRESS = "0x41c737f66a0Ee99CF7c66627300D4bC9ab5EE8B3";
+
+  const [votingCenterContractState, setVotingCenterContractState] =
+    useState<ethers.Contract>();
+  const [instanceState, setInstanceState] = useState<any>();
+
+  const CONTRACT_ADDRESS = "0xEC8872629351EedE971549dc69C0E7cBe94Be69e";
   const candidates: Candidate[] = [
     {
       id: 1,
@@ -67,22 +71,19 @@ function App() {
   };
 
   let instance: any;
-  let publicKey: any;
   const startup = async () => {
     await changeNetwork();
     await init();
-    await createFhevmInstance(); 
+    await createFhevmInstance();
     instance = getInstance();
-    // publicKey = instance.generateToken({
-    //   verifyingContract: CONTRACT_ADDRESS,
-    // }).publicKey;
+    setInstanceState(instance);
     setIsInitialized(true);
   };
 
-  let provider;
-  let signer;
+  let provider: any;
+  let signer: any;
   let votingCenterContract: ethers.Contract;
-  
+
   const connectWallet = async () => {
     provider = new ethers.BrowserProvider(window.ethereum);
     signer = await provider.getSigner();
@@ -92,7 +93,7 @@ function App() {
       v2.abi,
       signer
     );
-    
+    setVotingCenterContractState(votingCenterContract);
     const owner = await votingCenterContract.owner();
     setOwner(owner);
     const tokenAddress = await votingCenterContract.votingTokenAddress();
@@ -118,14 +119,15 @@ function App() {
   useEffect(() => {
     startup().catch((e) => console.log("init failed", e));
     connectWallet().catch((e) => console.log("connect wallet failed", e));
-  });
+  }, []);
 
   const voteForCandidate = async (candidateID: number): Promise<void> => {
     try {
       setLoading(true);
-      const encryptedVote = await instance.encrypt8(candidateID);
-      // const tx = await votingCenterContract.vote(encryptedVote); //fails here
-      const tx = await votingCenterContract["vote(bytes)"](encryptedVote); 
+      const encryptedVote = await instanceState.encrypt8(candidateID);
+      const tx = await votingCenterContractState?.vote(encryptedVote, {
+        gasLimit: 10000000,
+      });
       await tx.wait();
       console.log(tx);
       setLoading(false);
@@ -137,12 +139,14 @@ function App() {
   };
 
   const checkWinner = async () => {
-    const winner = await votingCenterContract.checkWinner(publicKey);
-    // const decryptedWinner = instance.decrypt(
-    //   CONTRACT_ADDRESS,
-    //   winner as string
-    // );
-    setWinner(winner);
+    const winner = await votingCenterContractState?.viewWinner();
+    setWinner(Number(winner));
+  };
+
+  const viewVoteCount = async (candidateID: Number) => {
+    const voteCount =
+      await votingCenterContractState?.viewVoteCount(candidateID);
+    console.log(voteCount);
   };
 
   const clickCardHandler = (candidateID: number) => {

@@ -44,7 +44,7 @@ export default function ConfirmationModal({
                 : `Casting Vote for Candidate ${selectedCandidate}`}
             </div>
             <div className="font-light mt-12">
-              Are you sure you want to proceed? <br /> Once your vote is casted,
+              Are you sure you want to proceed? <br /> Once your vote is cast,
               it CANNOT be changed.
             </div>
             <div className="flex w-full justify-evenly mt-8">
