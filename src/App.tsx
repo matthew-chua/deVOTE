@@ -15,12 +15,10 @@ import Overlay from "./components/Overlay";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [voterAddress, setVoterAddress] = useState("");
   const [winner, setWinner] = useState(0);
   const [votingTokenAddress, setVotingTokenAddress] = useState("");
   const [owner, setOwner] = useState("");
   const [burnable, setBurnable] = useState(false);
-  const [mintError, setMintError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
@@ -102,19 +100,6 @@ function App() {
     setBurnable(!mandatoryVoting);
   };
 
-  const mintForVoter = async (): Promise<void> => {
-    try {
-      const tx = await votingCenterContract.mint(voterAddress);
-      console.log(tx);
-    } catch (e) {
-      console.log("error minting", e);
-      setMintError(true);
-    }
-  };
-
-  const voterHandler = (e: any) => {
-    setVoterAddress(e.target.value as string);
-  };
 
   useEffect(() => {
     startup().catch((e) => console.log("init failed", e));
@@ -159,16 +144,6 @@ function App() {
   return (
     <div className="flex flex-col items-center font-display px-4 h-screen text-white">
       <h1 className="text-6xl font-thin mt-12">deVOTE</h1>
-      <div className="flex flex-col items-center">
-        <h2>Mint for User</h2>
-        <input
-          placeholder="Voter Address"
-          value={voterAddress}
-          onChange={voterHandler}
-        ></input>
-        <Button label="Mint" onClick={mintForVoter} />
-        {mintError && <div className="errorMessage">Minting Error</div>}
-      </div>
 
       <div className="flex flex-wrap gap-8 items-center justify-center my-8">
         {candidates.map((candidate) => (
