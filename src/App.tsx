@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { init, createFhevmInstance, getInstance } from "./fhevmjs";
 import { ethers } from "ethers";
 import v2 from "../src/abi/v2.json";
@@ -12,6 +12,9 @@ import Card from "./components/Card";
 import Banner from "./components/Banner";
 import ConfirmationModal from "./components/ConfirmationModal";
 import Overlay from "./components/Overlay";
+import { ContractContext } from "./main";
+import { CONTRACT_ADDRESS } from "./constants/Addresses";
+import Footer from "./components/Footer";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -28,7 +31,6 @@ function App() {
     useState<ethers.Contract>();
   const [instanceState, setInstanceState] = useState<any>();
 
-  const CONTRACT_ADDRESS = "0xEC8872629351EedE971549dc69C0E7cBe94Be69e";
   const candidates: Candidate[] = [
     {
       id: 1,
@@ -91,6 +93,8 @@ function App() {
       v2.abi,
       signer
     );
+    // const { contractState, setContractState } = useContext(ContractContext);
+    // setContractState(votingCenterContract);
     setVotingCenterContractState(votingCenterContract);
     const owner = await votingCenterContract.owner();
     setOwner(owner);
@@ -99,7 +103,6 @@ function App() {
     const mandatoryVoting = await votingCenterContract.mandatoryVoting();
     setBurnable(!mandatoryVoting);
   };
-
 
   useEffect(() => {
     startup().catch((e) => console.log("init failed", e));
@@ -128,12 +131,6 @@ function App() {
     setWinner(Number(winner));
   };
 
-  const viewVoteCount = async (candidateID: Number) => {
-    const voteCount =
-      await votingCenterContractState?.viewVoteCount(candidateID);
-    console.log(voteCount);
-  };
-
   const clickCardHandler = (candidateID: number) => {
     setOpenConfirmationModal(true);
     setSelectedCandidate(candidateID);
@@ -142,7 +139,7 @@ function App() {
   if (!isInitialized) return null;
 
   return (
-    <div className="flex flex-col items-center font-display px-4 h-screen text-white">
+    <div className="flex flex-col items-center font-display text-white">
       <h1 className="text-6xl font-thin mt-12">deVOTE</h1>
 
       <div className="flex flex-wrap gap-8 items-center justify-center my-8">
@@ -153,6 +150,7 @@ function App() {
             onClick={() => {
               clickCardHandler(candidate.id);
             }}
+            showResults={false}
           />
         ))}
       </div>
@@ -172,44 +170,11 @@ function App() {
           {winner === 0 ? `Tie` : candidates[winner - 1].name}
         </div>
       </div>
-      <hr className="h-1 my-4 w-full bg-white border-1" />
-      <div className="w-full bottom-4 left-4">
-        <div className="flex flex-col w-1/3">
-          <div className="flex">
-            <div>Voting Contract:</div>
-            <div className="grow" />
-            <a
-              href={`https://main.explorer.zama.ai/address/${CONTRACT_ADDRESS}`}
-              target="_blank"
-              className="w-80 hover:underline"
-            >
-              {CONTRACT_ADDRESS}
-            </a>
-          </div>
-          <div className="flex">
-            <div>Voting Token:</div>
-            <div className="grow" />
-            <a
-              href={`https://main.explorer.zama.ai/address/${votingTokenAddress}`}
-              target="_blank"
-              className="w-80 hover:underline"
-            >
-              {votingTokenAddress}
-            </a>
-          </div>
-          <div className="flex">
-            <div>Campaign Organiser:</div>
-            <div className="grow" />
-            <a
-              href={`https://main.explorer.zama.ai/address/${owner}`}
-              target="_blank"
-              className="w-80 hover:underline"
-            >
-              {owner}
-            </a>
-          </div>
-        </div>
-      </div>
+      <Footer
+        owner={owner}
+        votingTokenAddress={votingTokenAddress}
+        contractAddress={CONTRACT_ADDRESS}
+      />
 
       {openConfirmationModal && (
         <>

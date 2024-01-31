@@ -4,9 +4,13 @@ import Profile from "../assets/profile.svg";
 export default function Card({
   candidate,
   onClick,
+  showResults,
+  voteCount,
 }: {
   candidate: Candidate;
   onClick: () => void;
+  showResults: boolean;
+  voteCount?: Number;
 }) {
   return (
     <div
@@ -16,7 +20,7 @@ export default function Card({
       <img className="w-32 m-6" src={Profile} />
       <div className="text-2xl">{candidate.name}</div>
       <div className="font-thin">{candidate.description}</div>
-      <div className="text-2xl mt-6">300 votes</div>
+      {showResults && <div className="text-2xl mt-6">{voteCount} votes</div>}
     </div>
   );
 }
