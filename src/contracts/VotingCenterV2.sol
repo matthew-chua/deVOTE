@@ -44,6 +44,11 @@ contract VotingCenter {
         votingToken.mint(_to);
     }
 
+    function batchMint(address[] memory _to) public {
+        require(msg.sender == owner, "Only owner can mint");
+        votingToken.batchMint(_to);
+    }
+
     //return decrypted winner
     function viewWinner() public view returns (uint8) {
         return TFHE.decrypt(winnerID);

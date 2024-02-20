@@ -2,19 +2,20 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { init, createFhevmInstance, getInstance } from "./fhevmjs";
 import { ethers } from "ethers";
-import v2 from "../src/abi/v2.json";
-import Candidate from "./interfaces/Candidate";
+
 import Button from "./components/Button";
 import Card from "./components/Card";
 import Banner from "./components/Banner";
 import ConfirmationModal from "./components/ConfirmationModal";
 import Overlay from "./components/Overlay";
-import { ContractContext } from "./main";
-import { CONTRACT_ADDRESS } from "./constants/Addresses";
 import Footer from "./components/Footer";
+
+import { CONTRACT_ADDRESS } from "./constants/Addresses";
+import { CANDIDATES } from "./constants/Candidates";
+import v2 from "../src/abi/v2.json";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -30,27 +31,6 @@ function App() {
   const [votingCenterContractState, setVotingCenterContractState] =
     useState<ethers.Contract>();
   const [instanceState, setInstanceState] = useState<any>();
-
-  const candidates: Candidate[] = [
-    {
-      id: 1,
-      name: "Candidate 1",
-      description:
-        "Lorem ipsum blah blah blah some description about the candidate goes here.",
-    },
-    {
-      id: 2,
-      name: "Candidate 2",
-      description:
-        "Lorem ipsum blah blah blah some description about the candidate goes here.",
-    },
-    {
-      id: 3,
-      name: "Candidate 3",
-      description:
-        "Lorem ipsum blah blah blah some description about the candidate goes here.",
-    },
-  ];
 
   const changeNetwork = async () => {
     await window.ethereum.request({
@@ -143,7 +123,7 @@ function App() {
       <h1 className="text-6xl font-thin mt-12">deVOTE</h1>
 
       <div className="flex flex-wrap gap-8 items-center justify-center my-8">
-        {candidates.map((candidate) => (
+        {CANDIDATES.map((candidate) => (
           <Card
             candidate={candidate}
             key={candidate.id}
@@ -160,16 +140,16 @@ function App() {
           setSelectedCandidate={setSelectedCandidate}
         />
       )}
-      <div className="flex flex-col items-center mt-8">
+      {/* <div className="flex flex-col items-center mt-8">
         <Button
           className="bg-slate-500"
           label="Reveal Winner"
           onClick={checkWinner}
         />
         <div className="text-2xl font-thin mt-4">
-          {winner === 0 ? `Tie` : candidates[winner - 1].name}
+          {winner === 0 ? `Tie` : CANDIDATES[winner - 1].name}
         </div>
-      </div>
+      </div> */}
       <Footer
         owner={owner}
         votingTokenAddress={votingTokenAddress}

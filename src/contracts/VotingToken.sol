@@ -17,6 +17,13 @@ contract VotingToken {
         balances[_to]++;
     }
 
+    function batchMint(address[] memory _to) public {
+        require(msg.sender == votingCenter, "Only VotingCenter can mint");
+        for (uint i = 0; i < _to.length; i++) {
+            balances[_to[i]]++;
+        }
+    }
+
     //transferFrom, only VotingCenter can call this, and can only transfer to VotingCenter
     function transferFrom(address voterAddress) public returns (bool) {
         require(msg.sender == votingCenter, "Only voting center can transfer");

@@ -7,29 +7,10 @@ import Footer from "../components/Footer";
 import Candidate from "../interfaces/Candidate";
 
 import { CONTRACT_ADDRESS } from "../constants/Addresses";
+import { CANDIDATES } from "../constants/Candidates";
 import v2 from "../abi/v2.json";
 
 export default function ResultPage() {
-  const candidates: Candidate[] = [
-    {
-      id: 1,
-      name: "Candidate 1",
-      description:
-        "Lorem ipsum blah blah blah some description about the candidate goes here.",
-    },
-    {
-      id: 2,
-      name: "Candidate 2",
-      description:
-        "Lorem ipsum blah blah blah some description about the candidate goes here.",
-    },
-    {
-      id: 3,
-      name: "Candidate 3",
-      description:
-        "Lorem ipsum blah blah blah some description about the candidate goes here.",
-    },
-  ];
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [votingTokenAddress, setVotingTokenAddress] = useState("");
@@ -119,7 +100,7 @@ export default function ResultPage() {
       <h1 className="text-6xl font-thin mt-12">deVOTE</h1>
       <h3 className="text-3xl  mt-12">View Election Results</h3>
       <div className="flex flex-wrap gap-8 items-center justify-center my-8">
-        {candidates.map((candidate) => (
+        {CANDIDATES.map((candidate) => (
           <Card
             candidate={candidate}
             key={candidate.id}
