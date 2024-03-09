@@ -11,7 +11,6 @@ import { CANDIDATES } from "../constants/Candidates";
 import v2 from "../abi/v2.json";
 
 export default function ResultPage() {
-
   const [isInitialized, setIsInitialized] = useState(false);
   const [votingTokenAddress, setVotingTokenAddress] = useState("");
   const [owner, setOwner] = useState("");

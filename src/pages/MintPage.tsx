@@ -69,15 +69,20 @@ export default function MintPage() {
 
   const [voterAddress, setVoterAddress] = useState("");
   const [mintError, setMintError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const mintForVoter = async (): Promise<void> => {
     try {
+      setLoading(true);
       const tx = await votingCenterContractState?.mint(voterAddress, {
         gasLimit: 10000000,
       });
+      await tx.wait();
       console.log(tx);
+      setLoading(false);
     } catch (e) {
       console.log("error minting", e);
+      setLoading(false);
       setMintError(true);
     }
   };
@@ -93,13 +98,14 @@ export default function MintPage() {
           Enter the wallet address of the voter you want to register.
         </div>
         <input
-          className="rounded-xl h-12 text-xl p-2 mb-4 w-96"
+          className="rounded-xl h-12 p-2 mb-4 w-96 text-gray-700"
           placeholder="Voter Address"
           value={voterAddress}
           onChange={voterHandler}
         ></input>
         <Button label="Mint" onClick={mintForVoter} />
         {mintError && <div className="errorMessage">Minting Error</div>}
+        {loading && <div className="errorMessage">Minting...</div>}
       </div>
       <Footer
         owner={owner}

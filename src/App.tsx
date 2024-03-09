@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { init, createFhevmInstance, getInstance } from "./fhevmjs";
 import { ethers } from "ethers";
 
-import Button from "./components/Button";
 import Card from "./components/Card";
 import Banner from "./components/Banner";
 import ConfirmationModal from "./components/ConfirmationModal";
@@ -16,6 +15,7 @@ import Footer from "./components/Footer";
 import { CONTRACT_ADDRESS } from "./constants/Addresses";
 import { CANDIDATES } from "./constants/Candidates";
 import v2 from "../src/abi/v2.json";
+import ErrorAlert from "./components/ErrorAlert";
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -27,6 +27,7 @@ function App() {
   const [success, setSuccess] = useState(false);
   const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<number>(-1);
+  const [error, setError] = useState(false);
 
   const [votingCenterContractState, setVotingCenterContractState] =
     useState<ethers.Contract>();
@@ -73,8 +74,6 @@ function App() {
       v2.abi,
       signer
     );
-    // const { contractState, setContractState } = useContext(ContractContext);
-    // setContractState(votingCenterContract);
     setVotingCenterContractState(votingCenterContract);
     const owner = await votingCenterContract.owner();
     setOwner(owner);
@@ -85,6 +84,7 @@ function App() {
   };
 
   useEffect(() => {
+    console.log("how many times");
     startup().catch((e) => console.log("init failed", e));
     connectWallet().catch((e) => console.log("connect wallet failed", e));
   }, []);
@@ -102,6 +102,8 @@ function App() {
       setSuccess(true);
     } catch (e) {
       setLoading(false);
+      setError(true);
+      setOpenConfirmationModal(false);
       console.log(`Error voting for candidate ${candidateID}`, e);
     }
   };
@@ -140,21 +142,12 @@ function App() {
           setSelectedCandidate={setSelectedCandidate}
         />
       )}
-      {/* <div className="flex flex-col items-center mt-8">
-        <Button
-          className="bg-slate-500"
-          label="Reveal Winner"
-          onClick={checkWinner}
-        />
-        <div className="text-2xl font-thin mt-4">
-          {winner === 0 ? `Tie` : CANDIDATES[winner - 1].name}
-        </div>
-      </div> */}
       <Footer
         owner={owner}
         votingTokenAddress={votingTokenAddress}
         contractAddress={CONTRACT_ADDRESS}
       />
+      {error && <ErrorAlert setError={setError} />}
 
       {openConfirmationModal && (
         <>

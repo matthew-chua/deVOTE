@@ -10,6 +10,7 @@ export const init = async () => {
 let instance: FhevmInstance;
 
 export const createFhevmInstance = async () => {
+  if (instance) return instance;
   const provider = new BrowserProvider(window.ethereum);
   const network = await provider.getNetwork();
   const chainId = +network.chainId.toString();
