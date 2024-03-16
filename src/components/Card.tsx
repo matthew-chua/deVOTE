@@ -6,15 +6,20 @@ export default function Card({
   onClick,
   showResults,
   voteCount,
+  winner,
 }: {
   candidate: Candidate;
   onClick: () => void;
   showResults: boolean;
   voteCount?: Number;
+  winner?: boolean;
 }) {
+
+  const regularClass = "flex flex-col items-center bg-slate-500 p-4 text-center rounded-xl w-64 cursor-pointer transition duration-200 hover:scale-110"
+  const winnerClass = "flex flex-col items-center bg-red-400 p-4 text-center rounded-xl w-64 scale-110 cursor-pointer transition duration-200 hover:scale-110"
   return (
     <div
-      className="flex flex-col items-center bg-slate-500 p-4 text-center rounded-xl w-64 cursor-pointer transition duration-200 hover:scale-110"
+      className={winner ? winnerClass : regularClass}
       onClick={onClick}
     >
       <img className="w-32 m-6" src={Profile} />

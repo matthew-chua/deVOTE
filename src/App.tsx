@@ -38,6 +38,15 @@ function App() {
       method: "wallet_addEthereumChain",
       params: [
         {
+          // chainId: "0x2382",
+          // rpcUrls: ["https://testnet.inco.org"],
+          // chainName: "Inco Gentry Testnet",
+          // nativeCurrency: {
+          //   name: "INCO",
+          //   symbol: "INCO",
+          //   decimals: 18,
+          // },
+          // blockExplorerUrls: ["https://explorer.testnet.inco.org/"],
           chainId: "0x1F49",
           rpcUrls: ["https://devnet.zama.ai"],
           chainName: "Zama Devnet",
@@ -147,7 +156,17 @@ function App() {
         votingTokenAddress={votingTokenAddress}
         contractAddress={CONTRACT_ADDRESS}
       />
-      {error && <ErrorAlert setError={setError} />}
+      {error && (
+        <>
+          <Overlay
+            loading={loading}
+            onClick={() => {
+              setError(false);
+            }}
+          />
+          <ErrorAlert setError={setError} />
+        </>
+      )}
 
       {openConfirmationModal && (
         <>

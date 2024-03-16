@@ -21,12 +21,22 @@ export default function ResultPage() {
   const [count1, setCount1] = useState<Number>(0);
   const [count2, setCount2] = useState<Number>(0);
   const [count3, setCount3] = useState<Number>(0);
+  const [winner, setWinner] = useState<Number>(0);
 
   const changeNetwork = async () => {
     await window.ethereum.request({
       method: "wallet_addEthereumChain",
       params: [
         {
+          // chainId: "0x2382",
+          // rpcUrls: ["https://testnet.inco.org"],
+          // chainName: "Inco Gentry Testnet",
+          // nativeCurrency: {
+          //   name: "INCO",
+          //   symbol: "INCO",
+          //   decimals: 18,
+          // },
+          // blockExplorerUrls: ["https://explorer.testnet.inco.org/"],
           chainId: "0x1F49",
           rpcUrls: ["https://devnet.zama.ai"],
           chainName: "Zama Devnet",
@@ -68,6 +78,8 @@ export default function ResultPage() {
     setOwner(owner);
     const tokenAddress = await votingCenterContract.votingTokenAddress();
     setVotingTokenAddress(tokenAddress);
+    const winner = await votingCenterContract.viewWinner();
+    setWinner(Number(winner));
   };
 
   const viewVoteCount = async (candidateID: Number): Promise<Number> => {
@@ -105,6 +117,7 @@ export default function ResultPage() {
             key={candidate.id}
             onClick={() => {}}
             showResults={true}
+            winner={winner === candidate.id}
             voteCount={
               candidate.id === 1 ? count1 : candidate.id === 2 ? count2 : count3
             }

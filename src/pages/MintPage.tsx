@@ -19,6 +19,15 @@ export default function MintPage() {
       method: "wallet_addEthereumChain",
       params: [
         {
+          // chainId: "0x2382",
+          // rpcUrls: ["https://testnet.inco.org"],
+          // chainName: "Inco Gentry Testnet",
+          // nativeCurrency: {
+          //   name: "INCO",
+          //   symbol: "INCO",
+          //   decimals: 18,
+          // },
+          // blockExplorerUrls: ["https://explorer.testnet.inco.org/"],
           chainId: "0x1F49",
           rpcUrls: ["https://devnet.zama.ai"],
           chainName: "Zama Devnet",
@@ -65,13 +74,16 @@ export default function MintPage() {
   useEffect(() => {
     startup().catch((e) => console.log("init failed", e));
     connectWallet().catch((e) => console.log("connect wallet failed", e));
-  }, []);
+  }, [window.ethereum]);
 
   const [voterAddress, setVoterAddress] = useState("");
   const [mintError, setMintError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const mintForVoter = async (): Promise<void> => {
+    setSuccess(false);
+    setMintError(false);
     try {
       setLoading(true);
       const tx = await votingCenterContractState?.mint(voterAddress, {
@@ -80,6 +92,7 @@ export default function MintPage() {
       await tx.wait();
       console.log(tx);
       setLoading(false);
+      setSuccess(true);
     } catch (e) {
       console.log("error minting", e);
       setLoading(false);
@@ -106,6 +119,7 @@ export default function MintPage() {
         <Button label="Mint" onClick={mintForVoter} />
         {mintError && <div className="errorMessage">Minting Error</div>}
         {loading && <div className="errorMessage">Minting...</div>}
+        {success && <div className="errorMessage">Mint successful!</div>}
       </div>
       <Footer
         owner={owner}
